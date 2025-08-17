@@ -63,7 +63,8 @@ try {
                 'profile_id' => $user['profile_id'],
                 'first_name' => $user['first_name'],
                 'last_name' => $user['last_name']
-            ]
+            ],
+            'redirect' => 'profile.html'
         ]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid email/profile ID or password']);

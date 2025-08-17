@@ -427,9 +427,17 @@
       .then(data => {
         if (data.success) {
           alert('Login successful!');
+          
+          // Store user data in session storage
+          sessionStorage.setItem('user_id', data.user.id);
+          sessionStorage.setItem('user_email', data.user.email);
+          sessionStorage.setItem('user_name', data.user.first_name + ' ' + data.user.last_name);
+          sessionStorage.setItem('profile_id', data.user.profile_id);
+          
           closeLoginModal();
-          // Redirect or update UI as needed
-          window.location.reload();
+          
+          // Redirect to profile page
+          window.location.href = 'profile.html';
         } else {
           alert('Login failed: ' + data.message);
         }
@@ -441,9 +449,9 @@
     }
     
     function handleRegister() {
-      // Close login modal and redirect to register page
+      // Close login modal and redirect to registration page
       closeLoginModal();
-      window.location.href = 'register.html';
+      window.location.href = 'create_profile.html';
     }
   </script>
 </body>
