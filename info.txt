@@ -1,0 +1,1 @@
+design this registration page i provied design , also validate it and make xamp database for it 
