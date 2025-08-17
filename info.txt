@@ -1,1 +1,1 @@
-design this registration page i provied design , also validate it and make xamp database for it 
+i need the registration page design like this, add this elemets respectively and connect with data base , after the log in to this website this information will show as a my given format.in the profile section i want to edit any information and update the profile throw a update button

@@ -593,11 +593,124 @@
             return true;
         }
 
-        // Load profile data
+        // Add debugging console logs
+        function debugLog(message, data) {
+            console.log(`DEBUG: ${message}`, data);
+        }
+        
+        // Load profile data by profile ID (for newly registered users)
+        function loadProfileByProfileId(profileId) {
+            debugLog('Loading profile by profile_id', profileId);
+            document.getElementById('loading').style.display = 'block';
+            
+            fetch('get_profile_by_id.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ profile_id: profileId })
+            })
+            .then(response => {
+                debugLog('get_profile_by_id.php response status', response.status);
+                return response.json();
+            })
+            .then(data => {
+                debugLog('get_profile_by_id.php response data', data);
+                
+                if (data.success) {
+                    // Store user data in session
+                    if (data.user.id) {
+                        sessionStorage.setItem('user_id', data.user.id);
+                    }
+                    sessionStorage.setItem('user_email', data.user.email || '');
+                    sessionStorage.setItem('user_name', (data.user.first_name || '') + ' ' + (data.user.last_name || ''));
+                    
+                    populateForm(data.user);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('profileContent').style.display = 'block';
+                } else {
+                    debugLog('Profile not found by ID', 'Trying registration table');
+                    // If profile not found by ID, try to get it from the profile table directly
+                    loadProfileFromRegisterTable(profileId);
+                }
+            })
+            .catch(error => {
+                debugLog('Error in get_profile_by_id.php', error);
+                console.error('Error:', error);
+                // If API call fails, try to get from profile table
+                loadProfileFromRegisterTable(profileId);
+            });
+        }
+        
+        // Load profile data from registration table
+        function loadProfileFromRegisterTable(profileId) {
+            debugLog('Loading from registration table', profileId);
+            
+            fetch('get_register_profile.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ profile_id: profileId })
+            })
+            .then(response => {
+                debugLog('get_register_profile.php response status', response.status);
+                return response.json();
+            })
+            .then(data => {
+                debugLog('get_register_profile.php response data', data);
+                
+                if (data.success) {
+                    // Create a user object with available data
+                    const user = {
+                        profile_id: data.profile.profile_id,
+                        first_name: 'New',
+                        last_name: 'User',
+                        email: '',
+                        phone: '',
+                        date_of_birth: data.profile.date_of_birth,
+                        marital_status: data.profile.marital_status
+                    };
+                    
+                    debugLog('Created user object from profile data', user);
+                    populateForm(user);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('profileContent').style.display = 'block';
+                } else {
+                    debugLog('Error loading profile from registration table', data.message);
+                    alert('Error loading profile: ' + data.message);
+                    window.location.href = 'indext.html';
+                }
+            })
+            .catch(error => {
+                debugLog('Error in get_register_profile.php', error);
+                console.error('Error:', error);
+                alert('Error loading profile');
+                window.location.href = 'indext.html';
+            });
+        }
+        
+        // Load profile data for existing users
         function loadProfile() {
             const userId = sessionStorage.getItem('user_id');
             
+            debugLog('Loading profile with user_id', userId);
             document.getElementById('loading').style.display = 'block';
+            
+            if (!userId) {
+                debugLog('No user_id found in session', 'Checking for profile_id');
+                const profileId = sessionStorage.getItem('profile_id');
+                
+                if (profileId) {
+                    debugLog('Found profile_id instead', profileId);
+                    loadProfileByProfileId(profileId);
+                    return;
+                } else {
+                    debugLog('No authentication data found', 'Redirecting to login');
+                    window.location.href = 'indext.html';
+                    return;
+                }
+            }
             
             fetch('get_profile.php', {
                 method: 'POST',
@@ -606,19 +719,34 @@
                 },
                 body: JSON.stringify({ user_id: userId })
             })
-            .then(response => response.json())
+            .then(response => {
+                debugLog('get_profile.php response status', response.status);
+                return response.json();
+            })
             .then(data => {
+                debugLog('get_profile.php response data', data);
+                
                 if (data.success) {
                     populateForm(data.user);
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('profileContent').style.display = 'block';
                 } else {
-                    alert('Error loading profile: ' + data.message);
+                    // Try with profile_id as fallback
+                    const profileId = sessionStorage.getItem('profile_id');
+                    if (profileId) {
+                        debugLog('User not found, trying with profile_id instead', profileId);
+                        loadProfileByProfileId(profileId);
+                    } else {
+                        alert('Error loading profile: ' + data.message);
+                        document.getElementById('loading').style.display = 'none';
+                    }
                 }
             })
             .catch(error => {
+                debugLog('Error in get_profile.php', error);
                 console.error('Error:', error);
-                alert('Error loading profile');
+                alert('Error loading profile. Please try logging in again.');
+                document.getElementById('loading').style.display = 'none';
             });
         }
 
@@ -744,10 +872,57 @@
             window.location.href = 'indext.html';
         }
 
+        // Add debugging console logs
+        function debugLog(message, data) {
+            console.log(`DEBUG: ${message}`, data);
+        }
+        
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            if (checkLogin()) {
+            debugLog('DOM loaded', 'Starting profile page initialization');
+            
+            // Log what's in session storage
+            debugLog('SessionStorage contents', {
+                user_id: sessionStorage.getItem('user_id'),
+                user_email: sessionStorage.getItem('user_email'),
+                user_name: sessionStorage.getItem('user_name'),
+                profile_id: sessionStorage.getItem('profile_id'),
+                registered: sessionStorage.getItem('registered')
+            });
+            
+            // Check if user is coming from registration
+            const isNewRegistration = sessionStorage.getItem('registered') === 'true';
+            const profileId = sessionStorage.getItem('profile_id');
+            const userId = sessionStorage.getItem('user_id');
+            
+            if (isNewRegistration && profileId) {
+                debugLog('New registration detected', { profileId });
+                
+                // Show welcome message for new users
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = 'Registration successful! Welcome to your profile page.';
+                successMsg.style.display = 'block';
+                
+                // Load profile using profile_id instead of user_id
+                loadProfileByProfileId(profileId);
+                
+                // Clear the registration flag but keep profile_id
+                sessionStorage.removeItem('registered');
+                
+            } else if (userId) {
+                debugLog('Existing user detected', { userId });
+                // Normal login flow with user_id
                 loadProfile();
+                
+            } else if (profileId) {
+                debugLog('Only profile_id found', { profileId });
+                // We only have profile_id but no user_id
+                loadProfileByProfileId(profileId);
+                
+            } else {
+                debugLog('No authentication found', 'Redirecting to login');
+                // No authentication info found, redirect to login
+                window.location.href = 'indext.html';
             }
         });
     </script>

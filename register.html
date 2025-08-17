@@ -719,13 +719,19 @@
                     successMsg.textContent = result.message;
                     successMsg.style.display = 'block';
                     
-                    // Scroll to top to show success message
-                    window.scrollTo(0, 0);
+                    // Store user data in session storage for profile page
+                    sessionStorage.setItem('profile_id', result.profile_id);
+                    sessionStorage.setItem('registered', 'true');
                     
                     // Update profile ID if provided
                     if (result.profile_id) {
                         document.getElementById('profileId').textContent = result.profile_id;
                     }
+                    
+                    // Redirect to profile page after short delay to show success message
+                    setTimeout(() => {
+                        window.location.href = 'profile.html';
+                    }, 2000);
                 } else {
                     if (result.errors) {
                         Object.keys(result.errors).forEach(field => {

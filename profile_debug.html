@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Debug Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { color: #4CAF50; }
+        .card { border: 1px solid #ddd; border-radius: 4px; padding: 15px; margin-bottom: 20px; }
+        .error { color: red; }
+        .success { color: green; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px 15px; cursor: pointer; margin-top: 10px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow: auto; }
+        .field { margin-bottom: 10px; }
+        label { display: block; font-weight: bold; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Profile Debug Tool</h1>
+        
+        <div class="card">
+            <h2>Session Storage Data</h2>
+            <div id="sessionData"></div>
+            <button onclick="clearSession()">Clear Session Storage</button>
+        </div>
+        
+        <div class="card">
+            <h2>Test Direct Profile Fetch</h2>
+            <div class="field">
+                <label for="userId">User ID:</label>
+                <input type="text" id="userId" placeholder="Enter user_id">
+            </div>
+            <button onclick="testGetProfile()">Test get_profile.php</button>
+            <div id="profileResult"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Test Profile By ID Fetch</h2>
+            <div class="field">
+                <label for="profileId">Profile ID:</label>
+                <input type="text" id="profileId" placeholder="Enter profile_id">
+            </div>
+            <button onclick="testGetProfileById()">Test get_profile_by_id.php</button>
+            <div id="profileByIdResult"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Test Database Connection</h2>
+            <button onclick="testDbConnection()">Test Database Connection</button>
+            <div id="dbResult"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Quick Links</h2>
+            <ul>
+                <li><a href="indext.html">Main Page</a></li>
+                <li><a href="profile.html">Profile Page</a></li>
+                <li><a href="register.html">Register Page</a></li>
+                <li><a href="test_mysql_connection.php">Test MySQL Connection</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Display session storage data
+        function updateSessionData() {
+            const container = document.getElementById('sessionData');
+            const sessionKeys = ['user_id', 'user_email', 'user_name', 'profile_id', 'registered'];
+            
+            let html = '<h3>Current Session Storage:</h3>';
+            html += '<pre>';
+            
+            sessionKeys.forEach(key => {
+                const value = sessionStorage.getItem(key) || 'null';
+                html += `${key}: ${value}\n`;
+            });
+            
+            html += '</pre>';
+            container.innerHTML = html;
+        }
+        
+        // Clear session storage
+        function clearSession() {
+            sessionStorage.clear();
+            updateSessionData();
+            alert('Session storage cleared!');
+        }
+        
+        // Test get_profile.php
+        function testGetProfile() {
+            const userId = document.getElementById('userId').value;
+            
+            if (!userId) {
+                alert('Please enter a User ID');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('profileResult');
+            resultDiv.innerHTML = '<p>Loading...</p>';
+            
+            fetch('get_profile.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let html = '<h3>Result:</h3>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                resultDiv.innerHTML = html;
+                
+                if (data.success) {
+                    resultDiv.className = 'success';
+                } else {
+                    resultDiv.className = 'error';
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+            });
+        }
+        
+        // Test get_profile_by_id.php
+        function testGetProfileById() {
+            const profileId = document.getElementById('profileId').value;
+            
+            if (!profileId) {
+                alert('Please enter a Profile ID');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('profileByIdResult');
+            resultDiv.innerHTML = '<p>Loading...</p>';
+            
+            fetch('get_profile_by_id.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ profile_id: profileId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let html = '<h3>Result:</h3>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                resultDiv.innerHTML = html;
+                
+                if (data.success) {
+                    resultDiv.className = 'success';
+                } else {
+                    resultDiv.className = 'error';
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+            });
+        }
+        
+        // Test database connection
+        function testDbConnection() {
+            const resultDiv = document.getElementById('dbResult');
+            resultDiv.innerHTML = '<p>Testing connection...</p>';
+            
+            fetch('test_db_connection.php')
+            .then(response => response.text())
+            .then(data => {
+                resultDiv.innerHTML = data;
+            })
+            .catch(error => {
+                resultDiv.innerHTML = '<p class="error">Error: ' + error.message + '</p>';
+            });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSessionData();
+            
+            // Auto-fill fields from session storage if available
+            const userId = sessionStorage.getItem('user_id');
+            const profileId = sessionStorage.getItem('profile_id');
+            
+            if (userId) document.getElementById('userId').value = userId;
+            if (profileId) document.getElementById('profileId').value = profileId;
+        });
+    </script>
+</body>
+</html>

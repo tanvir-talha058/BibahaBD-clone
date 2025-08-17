@@ -7,7 +7,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 // Database configuration for XAMPP
 $servername = "localhost";
 $username = "root";        // Default XAMPP username
-$password = "";            // Default XAMPP password (empty)
+$password = "";            // Default XAMPP password is empty
 $dbname = "bibahabd_db";
 
 // Get JSON input
