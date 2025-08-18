@@ -887,11 +887,13 @@
                 user_email: sessionStorage.getItem('user_email'),
                 user_name: sessionStorage.getItem('user_name'),
                 profile_id: sessionStorage.getItem('profile_id'),
-                registered: sessionStorage.getItem('registered')
+                registered: sessionStorage.getItem('registered'),
+                logged_in: sessionStorage.getItem('logged_in')
             });
             
             // Check if user is coming from registration
             const isNewRegistration = sessionStorage.getItem('registered') === 'true';
+            const isLoggedIn = sessionStorage.getItem('logged_in') === 'true';
             const profileId = sessionStorage.getItem('profile_id');
             const userId = sessionStorage.getItem('user_id');
             
@@ -909,9 +911,20 @@
                 // Clear the registration flag but keep profile_id
                 sessionStorage.removeItem('registered');
                 
+            } else if (isLoggedIn && userId) {
+                debugLog('Logged in user detected', { userId });
+                // User has just logged in
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = 'Login successful! Welcome back.';
+                successMsg.style.display = 'block';
+                
+                // Normal login flow with user_id
+                loadProfile();
+                
+                // Keep the login state
             } else if (userId) {
                 debugLog('Existing user detected', { userId });
-                // Normal login flow with user_id
+                // Normal flow with user_id
                 loadProfile();
                 
             } else if (profileId) {

@@ -48,6 +48,7 @@ try {
         $_SESSION['profile_id'] = $user['profile_id'];
         $_SESSION['first_name'] = $user['first_name'];
         $_SESSION['last_name'] = $user['last_name'];
+        $_SESSION['logged_in'] = true;
         
         // Update last login time
         $updateStmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = :id");
