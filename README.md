@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # BibahaBD Registration System
 
 This is a complete registration and profile management system for BibahaBD.com. The system now includes seamless integration between registration, login, and profile management.
@@ -91,3 +92,6 @@ If you encounter any issues:
    - Check if you have a valid session by logging out and back in
    - Try clearing your browser cache and cookies
    - Make sure your registration data was saved correctly
+=======
+# BibahaBD-clone
+>>>>>>> 6943cf0d30cb0a39e55642548fd21199e0fafe55
