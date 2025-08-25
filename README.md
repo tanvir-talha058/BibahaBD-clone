@@ -76,7 +76,7 @@ This is a complete registration and profile management system for BibahaBD.com. 
    - Enter your email/profile ID and password
    - Click "Login" to access your profile
 
-## Troubleshooting
+## Troubleshootings
 
 If you encounter any issues:
 
