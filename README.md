@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # BibahaBD Registration System
 
 This is a complete registration and profile management system for BibahaBD.com. The system now includes seamless integration between registration, login, and profile management.
